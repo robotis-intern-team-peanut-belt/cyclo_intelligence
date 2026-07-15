@@ -6,6 +6,7 @@
 # Usage:
 #   docker/container.sh start              # → cyclo_intelligence
 #   docker/container.sh start-lerobot      # → lerobot (idle until LOAD)
+#   docker/container.sh train-lerobot <exp> # → train a policy (see train-lerobot --help)
 #   docker/container.sh start-groot        # → groot (idle until LOAD)
 #   docker/container.sh enter              # → shell in cyclo_intelligence
 #   docker/container.sh build-ui           # → rebuild React UI only
@@ -32,6 +33,8 @@ MAIN_SERVICE="cyclo_intelligence"
 MAIN_CONTAINER="cyclo_intelligence"
 LEROBOT_SERVICE="lerobot"
 LEROBOT_CONTAINER="${LEROBOT_CONTAINER_NAME:-lerobot_server}"
+LEROBOT_TRAIN_SERVICE="lerobot_train"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 GROOT_SERVICE="groot"
 GROOT_CONTAINER="${GROOT_CONTAINER_NAME:-groot_server}"
 
@@ -486,6 +489,20 @@ LeRobot policy container:
                    InferenceCommand.LOAD with a robot_type.
   enter-lerobot    Open an interactive bash in lerobot_server
 
+LeRobot training (batch job, separate image — see cyclo_brain/train/README.md):
+  train-lerobot <experiment> [--resume] [--no-tmux] [--dry-run] [--set K=V]
+                   Train a policy from a version-controlled experiment YAML in
+                   cyclo_brain/train/experiments/. Runs in its own container
+                   (serving image + wandb) so it never disturbs lerobot_server.
+                   e.g. train-lerobot act_smoke --no-tmux
+  train-lerobot --list
+                   List training runs under workspace/runs/
+  train-lerobot --promote <run-name>
+                   Copy a run's best checkpoint into the inference dropbox
+                   (workspace/model/lerobot/) so the engine can LOAD it.
+  train-lerobot --help
+                   Full training options
+
 GR00T policy container:
   start-groot      Build + start groot (N1.7 baseline). Same boot-idle
                    + LOAD-time configure pattern as lerobot.
@@ -691,6 +708,218 @@ start_lerobot() {
     $COMPOSE up -d $BUILD_FLAG "$LEROBOT_SERVICE"
 }
 
+# ---------------------------------------------------------------------------
+# Training
+#
+# This is the ONLY place that knows how to get from a host shell into a training
+# container. The old train_act.sh re-exec'd itself through `docker exec` by
+# comparing its own path to /workspace/lerobot; that magic-path trick also
+# silently dropped env overrides (RESUME/RUN_NAME/...) on the way in. Here the
+# host side (tmux, compose, provenance) lives in container.sh and the container
+# side (config -> argv -> train) lives in cyclo_train. Neither reaches into the
+# other.
+# ---------------------------------------------------------------------------
+train_usage() {
+    cat <<'EOF'
+Usage: container.sh train-lerobot <experiment> [options]
+       container.sh train-lerobot <subcommand> [args]
+
+Train:
+  <experiment>          Experiment under cyclo_brain/train/experiments/
+                        (e.g. act_smoke, peanut_act_80k), or a path to a YAML.
+  --resume              Continue the run from its last checkpoint.
+  --dry-run             Print the resolved trainer command and exit.
+  --set K=V             Override any config key (repeatable),
+                        e.g. --set train.steps=100 --set name=my_run
+  --no-tmux             Run in the foreground instead of a detached session.
+  --session NAME        tmux session name (default: cyclo_train).
+  --build, -b           Rebuild the training image first.
+
+Runs:
+  --list                List runs in the workspace.
+  --promote <run>       Publish a checkpoint for inference (--step <n> to choose).
+
+Datasets:
+  download <repo_id>    Fetch from the HuggingFace Hub, convert v2.1 -> v3.0.
+  convert <dataset>     Convert a local v2.1 dataset to v3.0 (--no-mobile to trim).
+  trim-mobile <dataset> Drop the 3 mobile DOFs from a v3.0 dataset.
+
+Analysis:
+  analyze-loss <run>    Find the loss plateau in a run's log.
+
+Examples:
+  container.sh train-lerobot act_smoke --no-tmux
+  container.sh train-lerobot peanut_act_80k
+  container.sh train-lerobot peanut_act_80k --resume
+  container.sh train-lerobot download RobotisSW/Task_900010_MyTask_lerobot
+  container.sh train-lerobot trim-mobile Task_900010_MyTask_lerobot
+  container.sh train-lerobot --promote peanut_act_80k
+
+Docs: cyclo_brain/train/README.md
+EOF
+}
+train_lerobot() {
+    local experiment="" use_tmux=true resume=false session="cyclo_train"
+    local mode="run" direct=""
+    local passthru=()
+
+    # Anything cyclo-train exposes that is not "train this experiment" is passed
+    # straight through, so `train-lerobot download <repo>` works like the CLI.
+    local direct_cmds=" download convert trim-mobile analyze-loss list promote validate "
+
+    # Flags that take a value are matched explicitly so their value can never be
+    # mistaken for the experiment name.
+    need_value() {
+        [ -n "${2:-}" ] || { echo "[container.sh] Error: $1 needs a value." >&2; exit 1; }
+    }
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -h|--help)  train_usage; return 0 ;;
+            --no-tmux)  use_tmux=false; shift ;;
+            --resume)   resume=true; shift ;;
+            --list)     mode="list"; use_tmux=false; shift ;;
+            --promote)  mode="promote"; use_tmux=false; shift ;;
+            --session)  need_value "$1" "${2:-}"; session="$2"; shift 2 ;;
+            --set)      need_value "$1" "${2:-}"; passthru+=("--set" "$2"); shift 2 ;;
+            --step)     need_value "$1" "${2:-}"; passthru+=("--step" "$2"); shift 2 ;;
+            --dry-run)  use_tmux=false; passthru+=("--dry-run"); shift ;;
+            --strict-tracking|--force) passthru+=("$1"); shift ;;
+            --*)        passthru+=("$1"); shift ;;
+            *)
+                if [ -z "$experiment" ] && [ "$mode" = "run" ] \
+                   && [ "${direct_cmds#* $1 }" != "$direct_cmds" ]; then
+                    # A cyclo-train subcommand, not an experiment.
+                    mode="direct"; direct="$1"; use_tmux=false
+                elif [ -z "$experiment" ]; then
+                    experiment="$1"
+                else
+                    passthru+=("$1")
+                fi
+                shift ;;
+        esac
+    done
+
+    case "$mode" in
+        run)
+            if [ -z "$experiment" ]; then
+                echo "[container.sh] Error: no experiment given." >&2
+                train_usage
+                exit 1
+            fi ;;
+        promote)
+            if [ -z "$experiment" ]; then
+                echo "[container.sh] Error: --promote needs a run name (see --list)." >&2
+                exit 1
+            fi ;;
+    esac
+
+    setup_storage
+
+    # docker/.env is where WANDB_API_KEY lives (git-ignored). Export it so the
+    # bare passthrough entries in docker-compose.yml can pick it up.
+    if [ -f "${SCRIPT_DIR}/.env" ]; then
+        set -a
+        # shellcheck disable=SC1091
+        . "${SCRIPT_DIR}/.env"
+        set +a
+    fi
+
+    # Provenance for the run manifest. The container has no .git (deliberately —
+    # only cyclo_brain/train is mounted, read-only), so it cannot compute these.
+    CYCLO_GIT_SHA="$(git -C "$PROJECT_ROOT" rev-parse HEAD 2>/dev/null || echo unknown)"
+    if [ -n "$(git -C "$PROJECT_ROOT" status --porcelain 2>/dev/null)" ]; then
+        CYCLO_GIT_DIRTY="true"
+    else
+        CYCLO_GIT_DIRTY="false"
+    fi
+    CYCLO_LEROBOT_SHA="$(git -C "${PROJECT_ROOT}/cyclo_brain/policy/lerobot/lerobot" \
+        rev-parse HEAD 2>/dev/null || echo unknown)"
+    CYCLO_TRAIN_IMAGE="robotis/lerobot-train:1.3.1-${ARCH}"
+    CYCLO_HOST_WORKSPACE="$(canonical_path "${SCRIPT_DIR}/workspace")"
+    export CYCLO_GIT_SHA CYCLO_GIT_DIRTY CYCLO_LEROBOT_SHA CYCLO_TRAIN_IMAGE CYCLO_HOST_WORKSPACE
+
+    if [ "$CYCLO_GIT_DIRTY" = "true" ]; then
+        echo "[container.sh] Note: working tree is dirty; the run manifest will record that."
+    fi
+
+    # The training image is the serving image + wandb, so the base must exist.
+    if ! docker image inspect "robotis/lerobot-zenoh:1.3.1-${ARCH}" >/dev/null 2>&1; then
+        echo "[container.sh] Base image robotis/lerobot-zenoh:1.3.1-${ARCH} not found locally."
+        echo "[container.sh] Fetching it (the training image is built on top of it)..."
+        $COMPOSE pull --ignore-pull-failures "$LEROBOT_SERVICE" || true
+    fi
+    if ! docker image inspect "$CYCLO_TRAIN_IMAGE" >/dev/null 2>&1; then
+        echo "[container.sh] Training image not built yet — building $CYCLO_TRAIN_IMAGE ..."
+        BUILD_FLAG="--build"
+    fi
+    if [ -n "$BUILD_FLAG" ]; then
+        $COMPOSE --profile train build "$LEROBOT_TRAIN_SERVICE" || exit 1
+    fi
+
+    # Build the in-container command.
+    local cmd=(python3 -m cyclo_train)
+    case "$mode" in
+        direct)  cmd+=("$direct" ${experiment:+"$experiment"} "${passthru[@]}") ;;
+        list)    cmd+=(list "${passthru[@]}") ;;
+        promote) cmd+=(promote "$experiment" "${passthru[@]}") ;;
+        run)
+            if [ "$resume" = true ]; then cmd+=(resume "$experiment"); else cmd+=(run "$experiment"); fi
+            cmd+=("${passthru[@]}")
+            ;;
+    esac
+
+    local compose_run=($COMPOSE --profile train run --rm "$LEROBOT_TRAIN_SERVICE" "${cmd[@]}")
+
+    if [ "$use_tmux" = true ] && [ -z "${TMUX:-}" ]; then
+        if ! command -v tmux >/dev/null 2>&1; then
+            echo "[container.sh] tmux not found; running in the foreground instead."
+            echo "[container.sh] (install tmux, or pass --no-tmux to silence this)"
+            "${compose_run[@]}"
+            return $?
+        fi
+        if tmux has-session -t "$session" 2>/dev/null; then
+            echo "[container.sh] A training session named '$session' is already running."
+            echo "[container.sh]   attach:  tmux attach -t $session"
+            echo "[container.sh]   or use:  --session <other-name>"
+            exit 1
+        fi
+        local quoted=""
+        local part
+        for part in "${compose_run[@]}"; do quoted+="$(printf '%q' "$part") "; done
+        # remain-on-exit keeps the pane (and its error output) after a failure;
+        # without it a config error kills the session instantly and the launch
+        # looks like it succeeded. It must be chained onto new-session, or a
+        # fast-failing command wins the race.
+        tmux new-session -d -s "$session" "$quoted" \; set-option -t "$session" remain-on-exit on
+
+        sleep 2
+        if ! tmux has-session -t "$session" 2>/dev/null; then
+            echo "[container.sh] Error: the training session exited immediately." >&2
+            return 1
+        fi
+        local dead
+        dead="$(tmux display-message -p -t "$session" '#{pane_dead}' 2>/dev/null)"
+        if [ "$dead" = "1" ]; then
+            echo "[container.sh] Training failed to start:" >&2
+            echo "---" >&2
+            tmux capture-pane -p -S - -t "$session" 2>/dev/null | grep -v '^$' | tail -20 >&2
+            echo "---" >&2
+            tmux kill-session -t "$session" 2>/dev/null
+            return 1
+        fi
+
+        echo "[container.sh] Training started in tmux session: $session"
+        echo "[container.sh]   attach:            tmux attach -t $session"
+        echo "[container.sh]   detach (inside):   Ctrl-b d"
+        echo "[container.sh]   live log:          tail -f \$(ls -t ${SCRIPT_DIR}/workspace/runs/*/train.log | head -1)"
+        echo "[container.sh]   list runs:         ./docker/container.sh train-lerobot --list"
+        return 0
+    fi
+
+    "${compose_run[@]}"
+}
+
 start_groot() {
     setup_storage
     setup_x11
@@ -797,6 +1026,7 @@ stop_all() {
 
 case "${1:-help}" in
     start)           start_main ;;
+    train-lerobot)   shift; train_lerobot "$@" ;;
     start-lerobot)   start_lerobot ;;
     start-groot)     start_groot ;;
     enter)           enter_main ;;

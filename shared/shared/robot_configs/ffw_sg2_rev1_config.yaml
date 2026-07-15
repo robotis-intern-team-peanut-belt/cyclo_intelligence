@@ -56,6 +56,7 @@ orchestrator:
               - head_joint1
               - head_joint2
               - lift_joint
+          # 이하 주석처리
           mobile:
             topic: /odom
             msg_type: nav_msgs/msg/Odometry
@@ -106,6 +107,7 @@ orchestrator:
           msg_type: trajectory_msgs/msg/JointTrajectory
           joint_names:
             - lift_joint
+        # 이하 주석처리
         mobile:
           topic: /cmd_vel
           msg_type: geometry_msgs/msg/Twist

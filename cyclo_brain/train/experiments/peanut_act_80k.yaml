@@ -1,0 +1,11 @@
+# Production ACT run: peanut mix pick-and-place, 900006+900007 merged,
+# mobile-base dims trimmed (22 -> 19).
+
+_base: _base/act.yaml
+
+name: Task_900006_900007_Collect_PeanutMix_To_Box_1110_UKH_merged_act_80k
+
+dataset:
+  # repo_id is identity only: lerobot loads from root and never touches the Hub.
+  repo_id: RobotisSW/Task_900006_900007_Collect_PeanutMix_To_Box_1110_UKH_merged_v30_lerobot_v30
+  root: ${workspace}/dataset/Task_900006_900007_Collect_PeanutMix_To_Box_1110_UKH_merged_v30_lerobot_v30_no_mobile

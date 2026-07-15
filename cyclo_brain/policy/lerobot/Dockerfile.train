@@ -1,0 +1,27 @@
+# syntax=docker/dockerfile:1
+#
+# LeRobot TRAINING image.
+#
+# Built FROM the serving image rather than from the nvcr.io base.
+# Build/run via:  docker/container.sh train-lerobot <experiment>
+
+ARG BASE_IMAGE=robotis/lerobot-zenoh:1.3.1-amd64
+FROM ${BASE_IMAGE}
+
+RUN if command -v uv >/dev/null 2>&1; then \
+        uv pip install --no-cache 'wandb>=0.24.0,<0.25.0'; \
+    else \
+        python3 -m pip install --no-cache-dir 'wandb>=0.24.0,<0.25.0'; \
+    fi \
+    && python3 -c "import wandb, lerobot, torch; \
+print('wandb', wandb.__version__, '| lerobot', lerobot.__version__, '| torch', torch.__version__)"
+
+ENTRYPOINT []
+CMD ["python3", "-m", "cyclo_train", "--help"]
+
+# /train is the read-only bind mount of cyclo_brain/train (tracked code).
+ENV PYTHONPATH=/train \
+    PYTHONUNBUFFERED=1 \
+    WANDB_SILENT=true
+
+WORKDIR /train

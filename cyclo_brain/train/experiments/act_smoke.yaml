@@ -1,0 +1,25 @@
+# Tiny end-to-end smoke test — proves the whole path works in a couple of minutes.
+#
+# Exercises: config resolution -> argv build -> manifest -> GPU -> dataloader ->
+# checkpoint save -> `last` symlink -> promote. Uses the smallest 19-dim v3.0
+# dataset available (900004, 7817 frames).
+#
+#   docker/container.sh train-lerobot act_smoke
+#
+# Each re-run needs a fresh name (run dirs are never silently overwritten):
+#   docker/container.sh train-lerobot act_smoke --set name=act_smoke_2
+
+_base: _base/act.yaml
+
+name: act_smoke
+
+dataset:
+  repo_id: RobotisSW/Task_900004_Collect_PeanutMix_To_Box_1110_0709_UKH_lerobot
+  root: ${workspace}/dataset/Task_900004_Collect_PeanutMix_To_Box_1110_0709_UKH_lerobot_v30_UKH_no_mobile
+
+train:
+  batch_size: 2
+  steps: 100
+  save_freq: 50 # two checkpoints, so `last` and promote are both exercised
+  num_workers: 2
+  seed: 1000

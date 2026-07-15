@@ -1,0 +1,34 @@
+# Pinned ACT (Action Chunking Transformer) defaults.
+#
+# The single copy of these numbers. Experiments inherit this with
+# `_base: _base/act.yaml` and override only what they change.
+#
+# Keys under `policy:` are forwarded as --policy.<key>=<value>, and keys under
+# `train:` as --<key>=<value>, so any lerobot flag is reachable from YAML.
+
+backend: lerobot
+
+policy:
+  type: act
+  device: cuda
+  chunk_size: 32
+  n_action_steps: 16
+  kl_weight: 10.0
+  dropout: 0.1
+  optimizer_lr: 1.0e-5
+  optimizer_weight_decay: 1.0e-4
+
+train:
+  batch_size: 8
+  steps: 80000
+  save_freq: 10000
+  num_workers: 4
+  seed: 1000
+  # How often metrics are logged (to stdout AND to wandb).
+  log_freq: 200
+
+tracking:
+  backend: wandb
+  project: cyclo-lerobot
+  entity: robotis-intern-team-peanut-belt
+  mode: online

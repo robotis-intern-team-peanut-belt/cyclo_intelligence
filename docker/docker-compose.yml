@@ -268,6 +268,81 @@ services:
               capabilities: [gpu]
 
   # ============================================================
+  # LeRobot TRAINING job (not a service).
+  #
+  # Batch container for `cyclo-train`. Guarded behind the `train` profile so it
+  # can never be started by a bare `docker compose up` — it is launched only by
+  # `docker/container.sh train-lerobot <experiment>`, which runs it with
+  # `compose run --rm` and removes it on exit.
+  #
+  # Deliberately NOT the lerobot_server container: that one is an inference
+  # runtime (s6 supervising main-runtime + engine-process) and, on AMD64, has no
+  # wandb. Training here also keeps a long job from sharing a container with a
+  # live inference process on the same GPU.
+  #
+  # No container_name on purpose: `compose run` generates its own per-run name,
+  # and a fixed name would collide across concurrent runs.
+  # ============================================================
+  lerobot_train:
+    profiles: ["train"]
+    image: robotis/lerobot-train:1.3.1-${ARCH:-arm64}
+    build:
+      # Same context as the lerobot service so the Dockerfile path lines up.
+      context: ../cyclo_brain/policy
+      dockerfile: lerobot/Dockerfile.train
+      network: host
+      args:
+        # The training image is the serving image + wandb. Keep this tag in sync
+        # with the `lerobot` service image above.
+        BASE_IMAGE: robotis/lerobot-zenoh:1.3.1-${ARCH:-arm64}
+    runtime: nvidia
+    # Dataloader workers exchange batches through /dev/shm; the 64 MB default
+    # causes "bus error" crashes with num_workers > 0.
+    shm_size: "16gb"
+    ulimits:
+      # Replaces the `ulimit -n 65536` line the old train_act.sh had to run
+      # itself: many video shards + worker fds.
+      nofile:
+        soft: 65536
+        hard: 65536
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - PYTHONUNBUFFERED=1
+      # Bare passthrough (no "=${VAR:-}") is deliberate and load-bearing:
+      # `CUDA_VISIBLE_DEVICES=` (empty string) HIDES EVERY GPU rather than
+      # meaning "all". With the bare form the var is simply absent unless the
+      # operator sets it, and torch sees all injected GPUs.
+      - CUDA_VISIBLE_DEVICES
+      - WANDB_API_KEY
+      - WANDB_MODE
+      - HF_TOKEN
+      # Provenance for the run manifest. The repo's .git is NOT mounted, so the
+      # container cannot compute these itself; container.sh injects them.
+      - CYCLO_GIT_SHA
+      - CYCLO_GIT_DIRTY
+      - CYCLO_LEROBOT_SHA
+      - CYCLO_TRAIN_IMAGE
+      # Lets the container print paths as the operator sees them on the host.
+      - CYCLO_HOST_WORKSPACE
+    volumes:
+      # Data (rw). Same bind mount every other service uses — unchanged contract.
+      - ./workspace:/workspace
+      - ./huggingface:/root/.cache/huggingface
+      # Tracked training code (ro). Mounted at a fresh path, never nested inside
+      # /workspace: writable outputs go to /workspace, code never does.
+      - ../cyclo_brain/train:/train:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    working_dir: /train
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+
+  # ============================================================
   # GR00T N1.7 two-process policy container.
   # Mirrors lerobot's s6-overlay layout (main-runtime + engine-process).
   # Pulled / started on demand by the UI

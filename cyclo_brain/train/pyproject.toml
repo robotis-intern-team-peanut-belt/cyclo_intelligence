@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cyclo-train"
+version = "0.1.0"
+description = "Config-driven policy training for Cyclo Intelligence"
+requires-python = ">=3.10"
+
+# Deliberately PURE-PYTHON and tiny. This package is bind-mounted read-only into
+# the policy/training images and must import there with no rebuild. The heavy
+# lifting (torch, lerobot) belongs to the image, not to us — we only build an argv
+# and shell out to `lerobot-train`.
+dependencies = ["pyyaml>=5.4"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+cyclo-train = "cyclo_train.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["cyclo_train*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

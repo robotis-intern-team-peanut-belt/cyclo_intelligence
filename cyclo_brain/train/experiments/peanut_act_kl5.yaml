@@ -1,0 +1,12 @@
+# ACT with a lower KL weight.
+
+_base: _base/act.yaml
+
+name: Task_900006_900007_Collect_PeanutMix_To_Box_1110_UKH_merged_act_80k_kl5
+
+dataset:
+  repo_id: RobotisSW/Task_900006_900007_Collect_PeanutMix_To_Box_1110_UKH_merged_v30_lerobot_v30
+  root: ${workspace}/dataset/Task_900006_900007_Collect_PeanutMix_To_Box_1110_UKH_merged_v30_lerobot_v30_no_mobile
+
+policy:
+  kl_weight: 5.0 # the only delta from peanut_act_80k
