@@ -1,0 +1,15 @@
+_base: _base/act.yaml
+
+# F2 stage-2, chunk_size ablation: 30 (peanut_act_stage2 baseline) -> 150.
+# Steps cut to 40k — see peanut_act_stage2_chunk60.yaml for why.
+name: Task_700001_pick_place_peanut_stage2_act_chunk150_40k
+
+dataset:
+  repo_id: RobotisSW/Task_700001_pick_place_peanut_stage2_MCAP_merged_lerobot_v30
+  root: ${workspace}/dataset/Task_700001_pick_place_peanut_stage2_MCAP_merged_lerobot_v30_no_mobile
+
+policy:
+  chunk_size: 150
+
+train:
+  steps: 40000

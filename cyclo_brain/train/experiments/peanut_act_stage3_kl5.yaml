@@ -1,0 +1,12 @@
+
+_base: _base/act.yaml
+
+# SG2 merged stage-3, identical to peanut_act_stage3 but kl_weight 10 -> 5.
+name: Task_900011_900012_stage3_x_900006_900007_merged_act_kl5_100k
+
+dataset:
+  repo_id: RobotisSW/Task_900011_900012_stage3_x_900006_900007_merged_no_mobile
+  root: ${workspace}/dataset/Task_900011_900012_stage3_x_900006_900007_merged_no_mobile
+
+policy:
+  kl_weight: 5.0

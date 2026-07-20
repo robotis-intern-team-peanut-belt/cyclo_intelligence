@@ -1,0 +1,11 @@
+_base: _base/act.yaml
+
+# SG2 merged stage-3, chunk_size ablation: 30 (peanut_act_stage3 baseline) -> 100.
+name: Task_900011_900012_stage3_x_900006_900007_merged_act_chunk100_100k
+
+dataset:
+  repo_id: RobotisSW/Task_900011_900012_stage3_x_900006_900007_merged_no_mobile
+  root: ${workspace}/dataset/Task_900011_900012_stage3_x_900006_900007_merged_no_mobile
+
+policy:
+  chunk_size: 100

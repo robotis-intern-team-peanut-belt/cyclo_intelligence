@@ -1,0 +1,12 @@
+
+_base: _base/act.yaml
+
+# F2 stage-2, identical to peanut_act_stage2 but kl_weight 10 -> 5.
+name: Task_700001_pick_place_peanut_stage2_act_kl5_100k
+
+dataset:
+  repo_id: RobotisSW/Task_700001_pick_place_peanut_stage2_MCAP_merged_lerobot_v30
+  root: ${workspace}/dataset/Task_700001_pick_place_peanut_stage2_MCAP_merged_lerobot_v30_no_mobile
+
+policy:
+  kl_weight: 5.0

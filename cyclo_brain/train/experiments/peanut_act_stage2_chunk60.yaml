@@ -1,0 +1,17 @@
+_base: _base/act.yaml
+
+# F2 stage-2, chunk_size ablation: 30 (peanut_act_stage2 baseline) -> 60.
+# Steps cut to 40k (~13.7 epochs on 23.4k frames) instead of the 100k/34-epoch
+# baseline: that run never stabilized per analyze-loss and likely overfit this
+# 53-episode dataset, so we don't want steps confounding the chunk_size read.
+name: Task_700001_pick_place_peanut_stage2_act_chunk60_40k
+
+dataset:
+  repo_id: RobotisSW/Task_700001_pick_place_peanut_stage2_MCAP_merged_lerobot_v30
+  root: ${workspace}/dataset/Task_700001_pick_place_peanut_stage2_MCAP_merged_lerobot_v30_no_mobile
+
+policy:
+  chunk_size: 60
+
+train:
+  steps: 40000
