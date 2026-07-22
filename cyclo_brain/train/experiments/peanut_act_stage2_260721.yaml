@@ -1,0 +1,11 @@
+
+_base: _base/act.yaml
+
+name: Task_700002_700003_pick_place_peanut_stage2_act_100k
+
+dataset:
+  # SG2 (ffw_sg2_rev1). Local merge of stage-3 pick/place (900011_900012) and the
+  # 900006_900007 collect set, both mobile-trimmed. repo_id is identity only:
+  # lerobot loads from root and never touches the Hub.
+  repo_id: RobotisSW/Task_700002_700003_pick_place_peanut_stage2_MCAP_lerobot_v30
+  root: ${workspace}/dataset/Task_700002_700003_pick_place_peanut_stage2_MCAP_lerobot_v30_no_mobile
