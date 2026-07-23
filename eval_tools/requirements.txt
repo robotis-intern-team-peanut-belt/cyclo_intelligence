@@ -1,0 +1,10 @@
+# L2 scoring web app + L3 aggregation. Pure-local, no robot/GPU deps.
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+imageio-ffmpeg>=0.5        # bundles a static ffmpeg binary (used only if system ffmpeg is absent)
+pandas>=2.0
+pyarrow>=14.0          # read LeRobot v3.0 meta/episodes/*.parquet
+numpy>=1.24
+matplotlib>=3.7
+scipy>=1.10

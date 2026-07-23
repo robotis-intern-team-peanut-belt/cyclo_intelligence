@@ -1,0 +1,8 @@
+# tool-local, never commit
+.venv/
+__pycache__/
+results/          # annotation CSV output
+_video_cache/     # merged videos (regenerated on demand)
+l3_out/           # L3 figures
+*.png
+*.mp4

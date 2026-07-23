@@ -1,5 +1,4 @@
-# Production ACT run: peanut mix pick-and-place, 900006+900007 merged,
-# mobile-base dims trimmed (22 -> 19).
+# 3Stage Pipeline Stage 2 Training
 
 _base: _base/act.yaml
 

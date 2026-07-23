@@ -1,0 +1,1227 @@
+{
+  "dataset": "Task_900011_900012_pick_place_peanut_stage3_MCAP_merged_lerobot_v30",
+  "root": "/home/robotis-ai/cyclo_intelligence/docker/workspace/dataset/Task_900011_900012_pick_place_peanut_stage3_MCAP_merged_lerobot_v30",
+  "camera": null,
+  "counts": {
+    "ambiguous": 9,
+    "success": 67
+  },
+  "predictions": {
+    "0": {
+      "pred": "ambiguous",
+      "confidence": 0.0,
+      "score": 0.0,
+      "in_box": 0,
+      "out_box": 42,
+      "total_yellow": 42,
+      "box": [
+        451,
+        383,
+        417,
+        295
+      ],
+      "camera": "cam_left_head",
+      "reason": "no packet visible near end (occluded? still held?)"
+    },
+    "1": {
+      "pred": "success",
+      "confidence": 0.982,
+      "score": 0.993,
+      "in_box": 5459,
+      "out_box": 39,
+      "total_yellow": 5498,
+      "box": [
+        450,
+        352,
+        422,
+        328
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "2": {
+      "pred": "success",
+      "confidence": 0.982,
+      "score": 0.993,
+      "in_box": 6558,
+      "out_box": 47,
+      "total_yellow": 6605,
+      "box": [
+        464,
+        374,
+        372,
+        313
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "3": {
+      "pred": "success",
+      "confidence": 0.957,
+      "score": 0.983,
+      "in_box": 3737,
+      "out_box": 66,
+      "total_yellow": 3803,
+      "box": [
+        418,
+        335,
+        423,
+        354
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "4": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 9880,
+      "out_box": 0,
+      "total_yellow": 9880,
+      "box": [
+        418,
+        404,
+        422,
+        282
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "5": {
+      "pred": "success",
+      "confidence": 0.947,
+      "score": 0.979,
+      "in_box": 4034,
+      "out_box": 88,
+      "total_yellow": 4122,
+      "box": [
+        418,
+        382,
+        422,
+        304
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "6": {
+      "pred": "success",
+      "confidence": 0.92,
+      "score": 0.968,
+      "in_box": 3802,
+      "out_box": 126,
+      "total_yellow": 3928,
+      "box": [
+        418,
+        362,
+        422,
+        324
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "7": {
+      "pred": "success",
+      "confidence": 0.95,
+      "score": 0.98,
+      "in_box": 4832,
+      "out_box": 98,
+      "total_yellow": 4930,
+      "box": [
+        420,
+        250,
+        417,
+        443
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "8": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 4266,
+      "out_box": 0,
+      "total_yellow": 4266,
+      "box": [
+        447,
+        355,
+        410,
+        313
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "9": {
+      "pred": "success",
+      "confidence": 0.891,
+      "score": 0.956,
+      "in_box": 4555,
+      "out_box": 208,
+      "total_yellow": 4763,
+      "box": [
+        387,
+        223,
+        473,
+        452
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "10": {
+      "pred": "success",
+      "confidence": 0.748,
+      "score": 0.899,
+      "in_box": 1875,
+      "out_box": 210,
+      "total_yellow": 2085,
+      "box": [
+        452,
+        365,
+        401,
+        277
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "11": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 1424,
+      "out_box": 0,
+      "total_yellow": 1424,
+      "box": [
+        447,
+        387,
+        406,
+        254
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "12": {
+      "pred": "success",
+      "confidence": 0.838,
+      "score": 0.935,
+      "in_box": 1525,
+      "out_box": 106,
+      "total_yellow": 1631,
+      "box": [
+        452,
+        376,
+        400,
+        266
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "13": {
+      "pred": "ambiguous",
+      "confidence": 0.0,
+      "score": 0.0,
+      "in_box": 891,
+      "out_box": 88,
+      "total_yellow": 979,
+      "box": [
+        432,
+        307,
+        400,
+        333
+      ],
+      "camera": "cam_left_head",
+      "reason": "no packet visible near end (occluded? still held?)"
+    },
+    "14": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 2759,
+      "out_box": 0,
+      "total_yellow": 2759,
+      "box": [
+        434,
+        318,
+        399,
+        318
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "15": {
+      "pred": "success",
+      "confidence": 0.303,
+      "score": 0.721,
+      "in_box": 4192,
+      "out_box": 1622,
+      "total_yellow": 5814,
+      "box": [
+        433,
+        383,
+        400,
+        253
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "16": {
+      "pred": "success",
+      "confidence": 0.974,
+      "score": 0.99,
+      "in_box": 4530,
+      "out_box": 48,
+      "total_yellow": 4578,
+      "box": [
+        434,
+        346,
+        403,
+        315
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "17": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 4136,
+      "out_box": 0,
+      "total_yellow": 4136,
+      "box": [
+        434,
+        301,
+        403,
+        362
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "18": {
+      "pred": "success",
+      "confidence": 0.975,
+      "score": 0.99,
+      "in_box": 4661,
+      "out_box": 48,
+      "total_yellow": 4709,
+      "box": [
+        434,
+        357,
+        402,
+        303
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "19": {
+      "pred": "ambiguous",
+      "confidence": 0.0,
+      "score": 0.0,
+      "in_box": 772,
+      "out_box": 0,
+      "total_yellow": 772,
+      "box": [
+        436,
+        337,
+        400,
+        324
+      ],
+      "camera": "cam_left_head",
+      "reason": "no packet visible near end (occluded? still held?)"
+    },
+    "20": {
+      "pred": "ambiguous",
+      "confidence": 0.0,
+      "score": 0.0,
+      "in_box": 1103,
+      "out_box": 71,
+      "total_yellow": 1174,
+      "box": [
+        436,
+        331,
+        400,
+        330
+      ],
+      "camera": "cam_left_head",
+      "reason": "no packet visible near end (occluded? still held?)"
+    },
+    "21": {
+      "pred": "success",
+      "confidence": 0.972,
+      "score": 0.989,
+      "in_box": 3057,
+      "out_box": 35,
+      "total_yellow": 3092,
+      "box": [
+        436,
+        286,
+        399,
+        377
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "22": {
+      "pred": "ambiguous",
+      "confidence": 0.0,
+      "score": 0.0,
+      "in_box": 834,
+      "out_box": 0,
+      "total_yellow": 834,
+      "box": [
+        430,
+        272,
+        398,
+        380
+      ],
+      "camera": "cam_left_head",
+      "reason": "no packet visible near end (occluded? still held?)"
+    },
+    "23": {
+      "pred": "ambiguous",
+      "confidence": 0.0,
+      "score": 0.0,
+      "in_box": 857,
+      "out_box": 0,
+      "total_yellow": 857,
+      "box": [
+        430,
+        280,
+        397,
+        370
+      ],
+      "camera": "cam_left_head",
+      "reason": "no packet visible near end (occluded? still held?)"
+    },
+    "24": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 1329,
+      "out_box": 0,
+      "total_yellow": 1329,
+      "box": [
+        395,
+        358,
+        408,
+        307
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "25": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 1934,
+      "out_box": 0,
+      "total_yellow": 1934,
+      "box": [
+        394,
+        350,
+        409,
+        315
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "26": {
+      "pred": "ambiguous",
+      "confidence": 0.0,
+      "score": 0.0,
+      "in_box": 387,
+      "out_box": 0,
+      "total_yellow": 387,
+      "box": [
+        546,
+        364,
+        410,
+        304
+      ],
+      "camera": "cam_left_head",
+      "reason": "no packet visible near end (occluded? still held?)"
+    },
+    "27": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 2749,
+      "out_box": 0,
+      "total_yellow": 2749,
+      "box": [
+        545,
+        364,
+        412,
+        304
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "28": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 3909,
+      "out_box": 0,
+      "total_yellow": 3909,
+      "box": [
+        545,
+        402,
+        411,
+        264
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "29": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 7976,
+      "out_box": 0,
+      "total_yellow": 7976,
+      "box": [
+        547,
+        401,
+        409,
+        268
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "30": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 3881,
+      "out_box": 0,
+      "total_yellow": 3881,
+      "box": [
+        534,
+        374,
+        408,
+        286
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "31": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 5192,
+      "out_box": 0,
+      "total_yellow": 5192,
+      "box": [
+        533,
+        228,
+        409,
+        438
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "32": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 2219,
+      "out_box": 0,
+      "total_yellow": 2219,
+      "box": [
+        534,
+        228,
+        408,
+        438
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "33": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 3586,
+      "out_box": 0,
+      "total_yellow": 3586,
+      "box": [
+        535,
+        190,
+        406,
+        478
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "34": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 2673,
+      "out_box": 0,
+      "total_yellow": 2673,
+      "box": [
+        532,
+        366,
+        410,
+        295
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "35": {
+      "pred": "ambiguous",
+      "confidence": 0.0,
+      "score": 0.0,
+      "in_box": 913,
+      "out_box": 0,
+      "total_yellow": 913,
+      "box": [
+        531,
+        359,
+        410,
+        303
+      ],
+      "camera": "cam_left_head",
+      "reason": "no packet visible near end (occluded? still held?)"
+    },
+    "36": {
+      "pred": "ambiguous",
+      "confidence": 0.0,
+      "score": 0.0,
+      "in_box": 260,
+      "out_box": 0,
+      "total_yellow": 260,
+      "box": [
+        531,
+        365,
+        409,
+        295
+      ],
+      "camera": "cam_left_head",
+      "reason": "no packet visible near end (occluded? still held?)"
+    },
+    "37": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 4228,
+      "out_box": 0,
+      "total_yellow": 4228,
+      "box": [
+        532,
+        353,
+        411,
+        308
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "38": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 1641,
+      "out_box": 0,
+      "total_yellow": 1641,
+      "box": [
+        531,
+        370,
+        411,
+        297
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "39": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 4296,
+      "out_box": 0,
+      "total_yellow": 4296,
+      "box": [
+        531,
+        372,
+        411,
+        295
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "40": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 9445,
+      "out_box": 0,
+      "total_yellow": 9445,
+      "box": [
+        531,
+        340,
+        409,
+        330
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "41": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 8338,
+      "out_box": 0,
+      "total_yellow": 8338,
+      "box": [
+        531,
+        308,
+        411,
+        362
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "42": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 2000,
+      "out_box": 0,
+      "total_yellow": 2000,
+      "box": [
+        525,
+        355,
+        415,
+        315
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "43": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 6174,
+      "out_box": 0,
+      "total_yellow": 6174,
+      "box": [
+        524,
+        355,
+        416,
+        316
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "44": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 6462,
+      "out_box": 0,
+      "total_yellow": 6462,
+      "box": [
+        525,
+        304,
+        413,
+        370
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "45": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 10523,
+      "out_box": 0,
+      "total_yellow": 10523,
+      "box": [
+        525,
+        313,
+        415,
+        360
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "46": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 5184,
+      "out_box": 0,
+      "total_yellow": 5184,
+      "box": [
+        523,
+        378,
+        411,
+        290
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "47": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 3155,
+      "out_box": 0,
+      "total_yellow": 3155,
+      "box": [
+        522,
+        371,
+        414,
+        297
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "48": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 3563,
+      "out_box": 0,
+      "total_yellow": 3563,
+      "box": [
+        521,
+        333,
+        413,
+        337
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "49": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 6166,
+      "out_box": 0,
+      "total_yellow": 6166,
+      "box": [
+        521,
+        362,
+        414,
+        307
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "50": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 3881,
+      "out_box": 0,
+      "total_yellow": 3881,
+      "box": [
+        515,
+        341,
+        417,
+        328
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "51": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 2995,
+      "out_box": 0,
+      "total_yellow": 2995,
+      "box": [
+        519,
+        366,
+        412,
+        300
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "52": {
+      "pred": "success",
+      "confidence": 0.94,
+      "score": 0.976,
+      "in_box": 2473,
+      "out_box": 61,
+      "total_yellow": 2534,
+      "box": [
+        520,
+        427,
+        410,
+        238
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "53": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 4016,
+      "out_box": 0,
+      "total_yellow": 4016,
+      "box": [
+        516,
+        365,
+        411,
+        303
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "54": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 3263,
+      "out_box": 0,
+      "total_yellow": 3263,
+      "box": [
+        515,
+        361,
+        409,
+        310
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "55": {
+      "pred": "success",
+      "confidence": 0.974,
+      "score": 0.99,
+      "in_box": 7421,
+      "out_box": 78,
+      "total_yellow": 7499,
+      "box": [
+        516,
+        364,
+        408,
+        307
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "56": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 5182,
+      "out_box": 0,
+      "total_yellow": 5182,
+      "box": [
+        515,
+        363,
+        409,
+        308
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "57": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 1656,
+      "out_box": 0,
+      "total_yellow": 1656,
+      "box": [
+        397,
+        284,
+        411,
+        391
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "58": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 4670,
+      "out_box": 0,
+      "total_yellow": 4670,
+      "box": [
+        395,
+        320,
+        413,
+        352
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "59": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 11153,
+      "out_box": 0,
+      "total_yellow": 11153,
+      "box": [
+        395,
+        346,
+        413,
+        326
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "60": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 1761,
+      "out_box": 0,
+      "total_yellow": 1761,
+      "box": [
+        395,
+        363,
+        413,
+        308
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "61": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 3065,
+      "out_box": 0,
+      "total_yellow": 3065,
+      "box": [
+        368,
+        364,
+        427,
+        328
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "62": {
+      "pred": "success",
+      "confidence": 0.6,
+      "score": 0.84,
+      "in_box": 6318,
+      "out_box": 1202,
+      "total_yellow": 7520,
+      "box": [
+        378,
+        321,
+        281,
+        369
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "63": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 3510,
+      "out_box": 0,
+      "total_yellow": 3510,
+      "box": [
+        483,
+        334,
+        302,
+        357
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "64": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 12246,
+      "out_box": 0,
+      "total_yellow": 12246,
+      "box": [
+        368,
+        413,
+        425,
+        272
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "65": {
+      "pred": "success",
+      "confidence": 0.96,
+      "score": 0.984,
+      "in_box": 12493,
+      "out_box": 201,
+      "total_yellow": 12694,
+      "box": [
+        365,
+        441,
+        428,
+        242
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "66": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 1939,
+      "out_box": 0,
+      "total_yellow": 1939,
+      "box": [
+        366,
+        366,
+        427,
+        321
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "67": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 1233,
+      "out_box": 0,
+      "total_yellow": 1233,
+      "box": [
+        370,
+        367,
+        423,
+        322
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "68": {
+      "pred": "success",
+      "confidence": 0.479,
+      "score": 0.792,
+      "in_box": 4286,
+      "out_box": 1129,
+      "total_yellow": 5415,
+      "box": [
+        365,
+        506,
+        428,
+        176
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "69": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 8427,
+      "out_box": 0,
+      "total_yellow": 8427,
+      "box": [
+        366,
+        219,
+        427,
+        476
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "70": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 6414,
+      "out_box": 0,
+      "total_yellow": 6414,
+      "box": [
+        367,
+        368,
+        426,
+        319
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "71": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 3269,
+      "out_box": 0,
+      "total_yellow": 3269,
+      "box": [
+        368,
+        389,
+        425,
+        301
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "72": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 3700,
+      "out_box": 0,
+      "total_yellow": 3700,
+      "box": [
+        368,
+        405,
+        425,
+        283
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "73": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 4595,
+      "out_box": 0,
+      "total_yellow": 4595,
+      "box": [
+        368,
+        364,
+        424,
+        326
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "74": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 5364,
+      "out_box": 0,
+      "total_yellow": 5364,
+      "box": [
+        370,
+        374,
+        423,
+        312
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    },
+    "75": {
+      "pred": "success",
+      "confidence": 1.0,
+      "score": 1.0,
+      "in_box": 5574,
+      "out_box": 0,
+      "total_yellow": 5574,
+      "box": [
+        367,
+        369,
+        426,
+        318
+      ],
+      "camera": "cam_left_head",
+      "reason": null
+    }
+  }
+}

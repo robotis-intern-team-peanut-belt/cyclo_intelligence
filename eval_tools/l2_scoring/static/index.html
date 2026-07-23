@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Cyclo Eval Scorer (L2)</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#181b22; --panel2:#212632; --line:#2c3342;
+    --fg:#e6e9ef; --muted:#8b93a7; --ok:#22c55e; --bad:#ef4444;
+    --accent:#3b82f6; --warn:#f59e0b;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;
+         background:var(--bg); color:var(--fg); }
+  header { background:var(--panel); border-bottom:1px solid var(--line); padding:8px 14px; }
+  .cfg { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:end; }
+  .cfg label { display:flex; flex-direction:column; font-size:11px; color:var(--muted); gap:2px; }
+  .cfg input, .cfg select { background:var(--panel2); color:var(--fg); border:1px solid var(--line);
+         border-radius:6px; padding:5px 8px; font-size:13px; }
+  .cfg input.path { width:340px; }
+  .cfg input.small { width:90px; }
+  button { cursor:pointer; background:var(--panel2); color:var(--fg); border:1px solid var(--line);
+           border-radius:6px; padding:6px 10px; font-size:13px; }
+  button:hover { border-color:var(--accent); }
+  button.primary { background:var(--accent); border-color:var(--accent); color:white; }
+  main { display:grid; grid-template-columns: 1fr 380px; gap:14px; padding:14px; }
+  .videowrap { text-align:center; }
+  .videobox { position:relative; display:inline-block; max-width:100%; background:#000;
+              border:1px solid var(--line); border-radius:8px; overflow:hidden; line-height:0; }
+  video { display:block; max-width:100%; max-height:60vh; width:auto; height:auto; background:#000; }
+  /* per-camera labels overlaid on the 2x2 grid */
+  .camlabels { position:absolute; inset:0; display:grid; pointer-events:none;
+               grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; }
+  .camlabels.hidden { display:none; }
+  .camlabels span { align-self:start; justify-self:start; margin:6px;
+                    background:rgba(0,0,0,.6); color:#fff; font-size:12px; line-height:1.4;
+                    padding:2px 7px; border-radius:4px; }
+  .counter { position:absolute; top:8px; right:8px; pointer-events:none;
+             background:rgba(0,0,0,.6); color:#fff; font:12px ui-monospace,monospace;
+             padding:3px 8px; border-radius:4px; }
+  .ctrlbar { display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap; }
+  .speeds { display:flex; gap:4px; align-items:center; color:var(--muted); font-size:12px; }
+  .speeds button { padding:3px 8px; font-size:12px; }
+  .speeds button.sel { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .epbar { display:flex; align-items:center; gap:12px; margin-top:10px; }
+  .epbar .task { color:var(--fg); font-size:15px; }
+  .epbar .meta { color:var(--muted); font-size:12px; }
+  .side { display:flex; flex-direction:column; gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px; }
+  .card h3 { margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+  .res-toggle { display:flex; gap:8px; }
+  .res-toggle button { flex:1; padding:10px; font-weight:600; }
+  .res-toggle button.sel-ok { background:var(--ok); border-color:var(--ok); color:#04220f; }
+  .res-toggle button.sel-bad { background:var(--bad); border-color:var(--bad); color:#2a0606; }
+  .fcodes { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .fcodes button { text-align:left; font-size:12px; }
+  .fcodes button.sel { background:var(--warn); border-color:var(--warn); color:#241a02; }
+  .fcodes.disabled { opacity:.35; pointer-events:none; }
+  .ypos { display:flex; gap:6px; }
+  .ypos button { flex:1; }
+  .ypos button.sel { background:var(--accent); border-color:var(--accent); color:white; }
+  .row { display:flex; gap:8px; align-items:center; }
+  .row label { font-size:11px; color:var(--muted); min-width:78px; }
+  .row input, .row textarea { flex:1; background:var(--panel2); color:var(--fg);
+        border:1px solid var(--line); border-radius:6px; padding:6px 8px; font-size:13px; }
+  textarea { resize:vertical; min-height:44px; }
+  .agg-grid { display:grid; grid-template-columns:auto 1fr; gap:4px 10px; font-size:13px; }
+  .agg-grid .k { color:var(--muted); }
+  .agg-grid .big { font-size:20px; font-weight:700; }
+  .fcount { display:flex; justify-content:space-between; font-size:12px; padding:2px 0;
+            border-bottom:1px dashed var(--line); }
+  .status { font-size:12px; color:var(--muted); }
+  .kbd { display:inline-block; background:var(--panel2); border:1px solid var(--line);
+         border-radius:4px; padding:0 5px; font-size:11px; color:var(--muted); }
+  .warnbox { background:#3a2a08; border:1px solid var(--warn); color:#f7d488; border-radius:6px;
+             padding:8px; font-size:12px; margin-top:8px; white-space:pre-wrap; }
+  .scored-ok { color:var(--ok); } .scored-bad { color:var(--bad); }
+  .autobadge { font-weight:700; font-size:15px; padding:6px 10px; border-radius:6px;
+               background:var(--panel2); text-align:center; }
+  .autobadge.b-ok { background:var(--ok); color:#04220f; }
+  .autobadge.b-bad { background:var(--bad); color:#2a0606; }
+  .autobadge.b-amb { background:var(--warn); color:#241a02; }
+  .thumbwrap { position:relative; margin-top:8px; display:none; cursor:crosshair; user-select:none; }
+  .thumbwrap img { width:100%; display:block; border-radius:6px; }
+  .roirect { position:absolute; border:2px solid #22d3ee; background:rgba(34,211,238,.15); }
+  .autocard .status { margin-top:6px; }
+  .flash { animation:flash .5s ease; }
+  @keyframes flash { from { background:var(--accent); } to {} }
+</style>
+</head>
+<body>
+<header>
+  <div class="cfg">
+    <label>Eval folder path
+      <input id="path" class="path" placeholder="/abs/path/to/policy_A_step10000_chunk50"/>
+    </label>
+    <button id="load" class="primary">Load</button>
+    <label>policy_id <input id="policy_id" class="small"/></label>
+    <label>checkpoint_step <input id="checkpoint_step" class="small"/></label>
+    <label>chunk_size <input id="chunk_size" class="small"/></label>
+    <label>session_id <input id="session_id" class="small"/></label>
+    <label>annotated_by <input id="annotated_by" class="small"/></label>
+    <label>layout
+      <select id="layout"><option value="auto">auto</option>
+      <option value="grid">grid 2x2</option>
+      <option value="horizontal">hstack</option>
+      <option value="vertical">vstack</option></select>
+    </label>
+  </div>
+  <div id="warn" class="warnbox" style="display:none"></div>
+</header>
+
+<main>
+  <section>
+    <div class="videowrap">
+      <div class="videobox" id="videobox">
+        <video id="vid" controls preload="auto"></video>
+        <div id="camlabels" class="camlabels hidden"></div>
+        <div id="counter" class="counter">FRAME –/– · 0.0/0.0s</div>
+      </div>
+    </div>
+    <div class="ctrlbar">
+      <div class="speeds"><span>speed</span>
+        <button data-sp="0.25">0.25×</button>
+        <button data-sp="0.5">0.5×</button>
+        <button data-sp="1" class="sel">1×</button>
+        <button data-sp="2">2×</button>
+      </div>
+      <button id="export" style="margin-left:auto">⬇ Export CSV</button>
+    </div>
+    <div class="epbar">
+      <button id="prev">← Prev</button>
+      <div><span id="epidx" class="task">–</span> <span id="eptask" class="task"></span>
+        <div id="epmeta" class="meta"></div></div>
+      <button id="next" style="margin-left:auto">Next →</button>
+    </div>
+    <div class="status" style="margin-top:8px">
+      <span class="kbd">←/→</span> nav &nbsp; <span class="kbd">S</span> success &nbsp;
+      <span class="kbd">F</span> fail &nbsp; <span class="kbd">0–6</span> failure code &nbsp;
+      <span class="kbd">Z/X/C</span> top/mid/bottom &nbsp; <span class="kbd">Space</span> play/pause &nbsp;
+      <span class="kbd">Enter</span> save + next
+    </div>
+  </section>
+
+  <aside class="side">
+    <div class="card autocard" id="autocard">
+      <h3>Auto pre-screen</h3>
+      <div id="autobadge" class="autobadge">—</div>
+      <div id="autoreason" class="status"></div>
+      <div class="thumbwrap" id="thumbwrap">
+        <img id="autothumb"/>
+        <div id="roirect" class="roirect" style="display:none"></div>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <button id="rejudge" title="이미지 위에서 드래그해 박스 영역을 지정한 뒤 누르세요">Re-judge (drag ROI)</button>
+        <button id="clearroi">Clear ROI</button>
+      </div>
+      <label class="status" style="display:block;margin-top:8px">
+        <input type="checkbox" id="ambonly"/> ambiguous/미검토만 보기 (←/→ 이동)</label>
+      <button id="acceptauto" class="primary" style="width:100%;margin-top:8px">
+        확신 예측 일괄 저장 → CSV</button>
+      <div id="autosummary" class="status"></div>
+    </div>
+    <div class="card">
+      <h3>Result</h3>
+      <div class="res-toggle">
+        <button id="btn-ok">✓ Success <span class="kbd">S</span></button>
+        <button id="btn-bad">✗ Failure <span class="kbd">F</span></button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Failure code</h3>
+      <div id="fcodes" class="fcodes disabled"></div>
+    </div>
+    <div class="card">
+      <h3>Condition</h3>
+      <div class="row"><label>init_condition_id</label>
+        <input id="init_condition_id" placeholder="e.g. c01"/></div>
+      <div style="height:8px"></div>
+      <div class="ypos" id="ypos"></div>
+      <div style="height:8px"></div>
+      <div class="row"><label>notes</label><textarea id="notes"></textarea></div>
+    </div>
+    <div class="card">
+      <h3>Live aggregation (this session)</h3>
+      <div class="agg-grid">
+        <span class="k">Scored</span><span id="a-scored">0 / 0</span>
+        <span class="k">Success rate</span><span id="a-rate" class="big">–</span>
+        <span class="k">✓ / ✗</span><span id="a-sb">0 / 0</span>
+        <span class="k">This episode</span><span id="a-cur">–</span>
+      </div>
+      <div style="height:8px"></div>
+      <div id="a-fcodes"></div>
+    </div>
+    <div class="status" id="savestatus"></div>
+  </aside>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+let LABELS = null, DS = null, EPS = [], cur = 0;
+const ann = new Map();      // trial_index -> record
+const draft = new Map();    // trial_index -> in-progress fields (unsaved)
+
+const runId = () => DS ? DS.folder_name : "";
+const sessionId = () => $("#session_id").value.trim() || "s1";
+
+function nowISO() { return new Date().toISOString(); }
+
+async function boot() {
+  LABELS = await (await fetch("/api/labels")).json();
+  // failure code buttons
+  const fc = $("#fcodes"); fc.innerHTML = "";
+  Object.entries(LABELS.failure_codes).forEach(([code, desc], i) => {
+    const b = document.createElement("button");
+    b.dataset.code = code; b.innerHTML = `<b>${code}</b> <span class="kbd">${i}</span><br>${desc}`;
+    b.onclick = () => setFailure(code);
+    fc.appendChild(b);
+  });
+  // y position buttons
+  const yp = $("#ypos"); yp.innerHTML = "";
+  const yk = {top:"Z", mid:"X", bottom:"C"};
+  LABELS.y_positions.forEach(p => {
+    const b = document.createElement("button");
+    b.dataset.y = p; b.innerHTML = `${p} <span class="kbd">${yk[p]||""}</span>`;
+    b.onclick = () => setY(p);
+    yp.appendChild(b);
+  });
+  if (!$("#session_id").value) $("#session_id").value = "s1";
+
+  // auto-load a dataset preloaded on the backend via --eval-root
+  try {
+    const cur = await (await fetch("/api/current")).json();
+    if (cur && cur.episodes && cur.episodes.length) await applyDataset(cur);
+  } catch (e) { /* none preloaded; wait for manual Load */ }
+}
+
+$("#load").onclick = loadDataset;
+async function loadDataset() {
+  const path = $("#path").value.trim();
+  if (!path) { alert("eval folder path를 입력하세요"); return; }
+  const r = await fetch("/api/dataset?path=" + encodeURIComponent(path));
+  if (!r.ok) { alert("load 실패: " + (await r.text())); return; }
+  await applyDataset(await r.json());
+}
+
+async function applyDataset(ds) {
+  DS = ds;
+  EPS = DS.episodes || [];
+  $("#path").value = DS.root || $("#path").value;
+  // auto-fill parsed metadata (editable)
+  if (DS.policy_id) $("#policy_id").value = DS.policy_id;
+  if (DS.checkpoint_step != null) $("#checkpoint_step").value = DS.checkpoint_step;
+  if (DS.chunk_size != null) $("#chunk_size").value = DS.chunk_size;
+  // warnings
+  const w = $("#warn");
+  if (DS.warnings && DS.warnings.length) { w.style.display="block"; w.textContent = "⚠ " + DS.warnings.join("\n⚠ "); }
+  else w.style.display="none";
+  await resume();
+  await loadPrescreen();
+  cur = 0; renderEpisode(); renderAgg();
+}
+
+async function resume() {
+  ann.clear(); draft.clear();
+  const r = await fetch(`/api/records?run_id=${encodeURIComponent(runId())}&session_id=${encodeURIComponent(sessionId())}`);
+  if (r.ok) (await r.json()).forEach(rec => ann.set(String(rec.trial_index), rec));
+}
+
+$("#session_id").onchange = async () => { if (DS) { await resume(); renderEpisode(); renderAgg(); } };
+
+function curEp() { return EPS[cur]; }
+function tkey() { return String(curEp().index); }
+
+function currentFields() {
+  // merge saved record + draft edits for the current episode
+  const k = tkey();
+  const saved = ann.get(k) || {};
+  const d = draft.get(k) || {};
+  return {
+    result: d.result ?? saved.result ?? "",
+    failure_code: d.failure_code ?? saved.failure_code ?? "",
+    y_position: d.y_position ?? saved.y_position ?? "",
+    init_condition_id: d.init_condition_id ?? saved.init_condition_id ?? "",
+    notes: d.notes ?? saved.notes ?? "",
+  };
+}
+
+let speed = 1;
+function effLayout(ep) {
+  const l = $("#layout").value;
+  if (l !== "auto") return l;
+  return (ep.cameras || []).length === 4 ? "grid" : "horizontal";
+}
+function camLabel(c) { return c.replace(/^cam_/, "").replace(/_/g, " "); }
+function renderCamLabels(ep) {
+  const el = $("#camlabels"), cams = ep.cameras || [];
+  if (effLayout(ep) === "grid" && cams.length === 4) {
+    el.className = "camlabels";
+    el.innerHTML = cams.map(c => `<span>${camLabel(c)}</span>`).join("");
+  } else { el.className = "camlabels hidden"; el.innerHTML = ""; }
+}
+function updateCounter() {
+  const v = $("#vid");
+  if (!EPS.length) return;
+  const ep = curEp();
+  const fps = DS && DS.fps ? DS.fps : null;
+  const totalF = (ep && ep.length != null) ? ep.length
+                 : (fps && isFinite(v.duration) ? Math.round(v.duration * fps) : null);
+  const curF = fps ? Math.round(v.currentTime * fps) : null;
+  const f = t => (isFinite(t) ? t : 0).toFixed(1);
+  $("#counter").textContent =
+    `FRAME ${curF ?? "–"}/${totalF ?? "–"} · ${f(v.currentTime)}/${f(v.duration)}s`;
+}
+function renderEpisode() {
+  if (!EPS.length) return;
+  const ep = curEp();
+  $("#epidx").textContent = `Episode ${ep.index}  (${cur+1}/${EPS.length})`;
+  $("#eptask").textContent = ep.task ? ` — ${ep.task}` : "";
+  $("#epmeta").textContent = `length=${ep.length ?? "?"}  cams=[${(ep.cameras||[]).join(", ")}]`;
+  const v = $("#vid");
+  v.src = `/api/video/${ep.index}?layout=${$("#layout").value}`;
+  v.load();
+  renderCamLabels(ep);
+  updateCounter();
+  renderAuto(ep);
+  paintFields();
+}
+$("#vid").addEventListener("timeupdate", updateCounter);
+$("#vid").addEventListener("loadedmetadata", () => { $("#vid").playbackRate = speed; updateCounter(); });
+document.querySelectorAll(".speeds button").forEach(b => b.onclick = () => {
+  speed = parseFloat(b.dataset.sp); $("#vid").playbackRate = speed;
+  document.querySelectorAll(".speeds button").forEach(x => x.className = (x === b ? "sel" : ""));
+});
+$("#export").onclick = () => { window.location = "/api/export"; };
+
+function paintFields() {
+  const f = currentFields();
+  $("#btn-ok").className = f.result === LABELS.result_success ? "sel-ok" : "";
+  $("#btn-bad").className = f.result === LABELS.result_failure ? "sel-bad" : "";
+  const fc = $("#fcodes");
+  fc.className = "fcodes" + (f.result === LABELS.result_failure ? "" : " disabled");
+  [...fc.children].forEach(b => b.className = b.dataset.code === f.failure_code ? "sel" : "");
+  [...$("#ypos").children].forEach(b => b.className = b.dataset.y === f.y_position ? "sel" : "");
+  $("#init_condition_id").value = f.init_condition_id;
+  $("#notes").value = f.notes;
+  // scored marker in episode label
+  const rec = ann.get(tkey());
+  const badge = rec ? (rec.result === LABELS.result_success
+      ? ' <span class="scored-ok">●</span>' : ' <span class="scored-bad">●</span>') : "";
+  $("#epidx").innerHTML = $("#epidx").textContent + badge;
+  // this-episode review status
+  const curEl = $("#a-cur");
+  if (!rec) { curEl.textContent = "미검토"; curEl.className = ""; }
+  else if (rec.result === LABELS.result_success) { curEl.innerHTML = "검토됨 ✓"; curEl.className = "scored-ok"; }
+  else { curEl.innerHTML = `검토됨 ✗ ${rec.failure_code||""}`; curEl.className = "scored-bad"; }
+}
+
+function editDraft(patch) {
+  const k = tkey();
+  draft.set(k, Object.assign({}, draft.get(k) || {}, patch));
+  paintFields();
+}
+function setResult(r) {
+  const patch = { result: r };
+  if (r === LABELS.result_success) patch.failure_code = "";
+  editDraft(patch); save();
+}
+function setFailure(code) { editDraft({ result: LABELS.result_failure, failure_code: code }); save(); }
+function setY(p) { editDraft({ y_position: p }); save(); }
+
+$("#btn-ok").onclick = () => setResult(LABELS.result_success);
+$("#btn-bad").onclick = () => setResult(LABELS.result_failure);
+$("#init_condition_id").oninput = e => editDraft({ init_condition_id: e.target.value });
+$("#notes").oninput = e => editDraft({ notes: e.target.value });
+$("#init_condition_id").onchange = save;
+$("#notes").onchange = save;
+
+async function save() {
+  if (!DS) return;
+  const f = currentFields();
+  if (!f.result) return; // nothing meaningful to persist yet
+  const ep = curEp();
+  const rec = {
+    run_id: runId(), session_id: sessionId(),
+    policy_id: $("#policy_id").value.trim(),
+    checkpoint_step: $("#checkpoint_step").value.trim(),
+    chunk_size: $("#chunk_size").value.trim(),
+    trial_index: ep.index,
+    init_condition_id: f.init_condition_id,
+    y_position: f.y_position,
+    result: f.result,
+    failure_code: f.result === LABELS.result_failure ? f.failure_code : "",
+    notes: f.notes,
+    video_path: `${DS.folder_name}:episode_${ep.index}`,
+    annotated_by: $("#annotated_by").value.trim(),
+    annotated_at: nowISO(),
+  };
+  const r = await fetch("/api/records", {
+    method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(rec) });
+  if (r.ok) {
+    const saved = await r.json();
+    ann.set(String(ep.index), saved);
+    draft.delete(String(ep.index));
+    $("#savestatus").textContent = `saved ep ${ep.index} @ ${new Date().toLocaleTimeString()}`;
+    renderAgg(); paintFields();
+  } else {
+    $("#savestatus").textContent = "save FAILED: " + (await r.text());
+  }
+}
+
+function go(delta) {
+  if (!EPS.length) return;
+  save();
+  if ($("#ambonly").checked) {
+    let i = cur;
+    for (let step = 0; step < EPS.length; step++) {
+      i += delta;
+      if (i < 0 || i >= EPS.length) break;
+      if (needsReview(EPS[i])) { cur = i; renderEpisode(); return; }
+    }
+    return; // none left in that direction
+  }
+  cur = Math.max(0, Math.min(EPS.length-1, cur+delta));
+  renderEpisode();
+}
+
+// ---- auto pre-screen ----
+let PRESCREEN = {}, pendingRoi = null, drag = null;
+async function loadPrescreen() {
+  try {
+    const d = await (await fetch("/api/prescreen")).json();
+    PRESCREEN = d.predictions || {};
+  } catch (e) { PRESCREEN = {}; }
+  updateAutoSummary();
+}
+function pred(ep) { return PRESCREEN[String(ep.index)]; }
+function needsReview(ep) {
+  if (ann.has(String(ep.index))) return false;        // already human-scored
+  const p = pred(ep);
+  return !p || p.pred === "ambiguous";                // no prediction or uncertain
+}
+function renderAuto(ep) {
+  const p = pred(ep), badge = $("#autobadge"), reason = $("#autoreason"), tw = $("#thumbwrap");
+  pendingRoi = null; clearRoiRect();
+  if (!p) { badge.textContent = "(예측 없음 — prescreen 미실행)"; badge.className = "autobadge";
+            reason.textContent = ""; tw.style.display = "none"; return; }
+  badge.textContent = `${p.pred.toUpperCase()} · conf ${p.confidence ?? "-"}`;
+  badge.className = "autobadge " + (p.pred === "success" ? "b-ok" : p.pred === "failure" ? "b-bad" : "b-amb");
+  reason.textContent = `${p.reason || ""}  (in=${p.in_box ?? "?"} out=${p.out_box ?? "?"}`
+    + `${p.roi_override ? ", ROI수동" : ""})`;
+  $("#autothumb").src = `/api/prescreen/thumb/${ep.index}?t=` + Date.now();
+  tw.style.display = "block";
+}
+function updateAutoSummary() {
+  const vals = Object.values(PRESCREEN);
+  const el = $("#autosummary");
+  if (!vals.length) { el.textContent = "pre-screen 결과 없음"; return; }
+  const c = { success: 0, failure: 0, ambiguous: 0 };
+  vals.forEach(v => c[v.pred] = (c[v.pred] || 0) + 1);
+  const need = EPS.filter(needsReview).length;
+  el.textContent = `auto ✓${c.success} ✗${c.failure} ?${c.ambiguous} · 사람 검토필요 ${need}`;
+}
+
+// ROI drawing on the review thumbnail (coords -> head-cam pixel space)
+const rr = () => $("#roirect");
+function clearRoiRect() { rr().style.display = "none"; rr()._disp = null; }
+$("#thumbwrap").addEventListener("mousedown", e => {
+  const img = $("#autothumb"); if ($("#thumbwrap").style.display === "none") return;
+  const b = img.getBoundingClientRect();
+  drag = { x: e.clientX - b.left, y: e.clientY - b.top };
+  rr().style.display = "block"; roiMove(e); e.preventDefault();
+});
+window.addEventListener("mousemove", e => { if (drag) roiMove(e); });
+window.addEventListener("mouseup", () => {
+  if (!drag) return; const r = rectToImg(); drag = null; if (r) pendingRoi = r;
+});
+function roiMove(e) {
+  const img = $("#autothumb"), b = img.getBoundingClientRect();
+  const x = Math.max(0, Math.min(b.width, e.clientX - b.left));
+  const y = Math.max(0, Math.min(b.height, e.clientY - b.top));
+  const x0 = Math.min(x, drag.x), y0 = Math.min(y, drag.y), w = Math.abs(x - drag.x), h = Math.abs(y - drag.y);
+  Object.assign(rr().style, { left: x0+"px", top: y0+"px", width: w+"px", height: h+"px" });
+  rr()._disp = { x0, y0, w, h, bw: b.width, bh: b.height };
+}
+function rectToImg() {
+  const d = rr()._disp, img = $("#autothumb");
+  if (!d || d.w < 5 || d.h < 5) return null;
+  const sx = img.naturalWidth / d.bw, sy = img.naturalHeight / d.bh;
+  return [Math.round(d.x0*sx), Math.round(d.y0*sy), Math.round(d.w*sx), Math.round(d.h*sy)];
+}
+$("#rejudge").onclick = async () => {
+  const ep = curEp();
+  const r = await fetch("/api/prescreen/rejudge", { method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ ep_index: ep.index, roi: pendingRoi || null }) });
+  if (r.ok) { PRESCREEN[String(ep.index)] = await r.json(); renderAuto(ep); updateAutoSummary(); }
+  else alert("re-judge 실패: " + (await r.text()));
+};
+$("#clearroi").onclick = () => { pendingRoi = null; clearRoiRect(); };
+$("#ambonly").onchange = updateAutoSummary;
+$("#acceptauto").onclick = async () => {
+  const conf = Object.entries(PRESCREEN).filter(([k,v]) => v.pred === "success" || v.pred === "failure");
+  let n = 0, skipped = 0;
+  for (const [k, v] of conf) {
+    if (ann.has(String(k))) { skipped++; continue; }         // never override a human
+    const ep = EPS.find(e => String(e.index) === String(k)); if (!ep) continue;
+    const rec = {
+      run_id: runId(), session_id: sessionId(),
+      policy_id: $("#policy_id").value.trim(), checkpoint_step: $("#checkpoint_step").value.trim(),
+      chunk_size: $("#chunk_size").value.trim(), trial_index: ep.index,
+      init_condition_id: "", y_position: "", result: v.pred, failure_code: "",
+      notes: `auto:prescreen score=${v.score} conf=${v.confidence}`,
+      video_path: `${DS.folder_name}:episode_${ep.index}`,
+      annotated_by: "auto:prescreen", annotated_at: nowISO(),
+    };
+    const r = await fetch("/api/records", { method: "POST",
+      headers: {"Content-Type":"application/json"}, body: JSON.stringify(rec) });
+    if (r.ok) { ann.set(String(ep.index), await r.json()); n++; }
+  }
+  renderAgg(); paintFields(); updateAutoSummary();
+  alert(`${n}건 auto 저장 완료 (기존 사람 채점 ${skipped}건은 유지).\n`
+      + `이제 'ambiguous/미검토만 보기'를 켜고 ←/→로 나머지만 검토하세요.`);
+};
+$("#prev").onclick = () => go(-1);
+$("#next").onclick = () => go(1);
+$("#layout").onchange = renderEpisode;
+
+function renderAgg() {
+  const recs = [...ann.values()];
+  const scored = recs.length;
+  const ok = recs.filter(r => r.result === LABELS.result_success).length;
+  const bad = recs.filter(r => r.result === LABELS.result_failure).length;
+  $("#a-scored").textContent = `${scored} / ${EPS.length}`;
+  $("#a-rate").textContent = scored ? (100*ok/scored).toFixed(1)+"%" : "–";
+  $("#a-sb").textContent = `${ok} / ${bad}`;
+  const counts = {};
+  Object.keys(LABELS.failure_codes).forEach(c => counts[c]=0);
+  recs.forEach(r => { if (r.failure_code && counts[r.failure_code] != null) counts[r.failure_code]++; });
+  $("#a-fcodes").innerHTML = Object.entries(counts).map(([c,n]) =>
+    `<div class="fcount"><span>${c}</span><span>${n}</span></div>`).join("");
+}
+
+// ---- keyboard ----
+const typing = () => ["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName);
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { document.activeElement.blur(); return; }
+  if (typing()) return;               // don't hijack while editing text fields
+  if (!EPS.length) return;
+  if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
+  else if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
+  else if (e.key === "Enter") { e.preventDefault(); go(1); }
+  else if (e.key === " ") { e.preventDefault(); const v=$("#vid"); v.paused?v.play():v.pause(); }
+  else if (e.key === "s" || e.key === "S") setResult(LABELS.result_success);
+  else if (e.key === "f" || e.key === "F") setResult(LABELS.result_failure);
+  else if (/^[0-9]$/.test(e.key)) {
+    const code = "F" + e.key;
+    if (LABELS.failure_codes[code]) setFailure(code);
+  }
+  else if ("zZ".includes(e.key)) setY("top");
+  else if ("xX".includes(e.key)) setY("mid");
+  else if ("cC".includes(e.key)) setY("bottom");
+});
+
+boot();
+</script>
+</body>
+</html>
